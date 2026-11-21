@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" data-kuse-mode="interactive">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>真平國中七年級 台語第一單元 互動測驗</title>
+<style>
+  :root{
+    --primary:#2d6a4f;
+    --primary-dark:#1b4332;
+    --accent:#e76f51;
+    --accent2:#f4a261;
+    --bg:#f6fbf7;
+    --card:#ffffff;
+    --ok:#2a9d8f;
+    --bad:#e63946;
+    --text:#1b263b;
+    --muted:#6c757d;
+    --border:#d8e9df;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:linear-gradient(135deg,#eef9f1,#e4f3ea);
+    color:var(--text);
+    padding:16px;
+    line-height:1.6;
+  }
+  #kuse-main{ max-width:900px; margin:0 auto; }
+  header.hero{
+    background:linear-gradient(120deg,var(--primary),var(--primary-dark));
+    color:#fff;
+    border-radius:20px;
+    padding:28px 24px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(27,67,50,.25);
+    margin-bottom:20px;
+  }
+  header.hero h1{ margin:0 0 8px; font-size:clamp(20px,5vw,28px); }
+  header.hero p{ margin:4px 0; opacity:.92; font-size:14px; }
+  .meta-row{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .meta-pill{
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35);
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:13px;
+  }
+  .progress-wrap{
+    background:var(--card);
+    border-radius:16px;
+    padding:14px 18px;
+    margin-bottom:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.06);
+    position:sticky;
+    top:8px;
+    z-index:10;
+  }
+  .progress-top{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:14px; margin-bottom:8px; color:var(--muted); flex-wrap:wrap; gap:6px;
+  }
+  .progress-top b{color:var(--primary-dark);font-size:16px;}
+  .progress-bar-bg{ width:100%; height:12px; background:#e9f2ec; border-radius:999px; overflow:hidden; }
+  .progress-bar-fill{
+    height:100%; width:0%;
+    background:linear-gradient(90deg,var(--ok),var(--primary));
+    border-radius:999px; transition:width .35s ease;
+  }
+  section.block{
+    background:var(--card);
+    border-radius:18px;
+    padding:22px 20px;
+    margin-bottom:22px;
+    box-shadow:0 6px 20px rgba(0,0,0,.06);
+    border:1px solid var(--border);
+  }
+  section.block h2{
+    margin:0 0 6px; font-size:19px; color:var(--primary-dark);
+    display:flex; align-items:center; gap:8px; justify-content:space-between; flex-wrap:wrap;
+  }
+  .block-sub{ font-size:13px; color:var(--muted); margin-bottom:16px; }
+  .badge-score{
+    margin-left:auto; background:var(--accent2); color:#5a3200;
+    font-size:12px; padding:3px 10px; border-radius:999px; font-weight:600;
+  }
+
+  /* 圈選題樣式（單選按鈕群組，模擬圈起來） */
+  .circle-question{
+    padding:14px; border-radius:14px; background:#fafdfb;
+    border:1px solid var(--border); margin-bottom:14px;
+  }
+  .circle-question .q-title{
+    font-size:16px; font-weight:700; margin-bottom:10px;
+    display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;
+  }
+  .circle-question .q-num{
+    color:#fff; background:var(--primary); border-radius:50%;
+    width:24px;height:24px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:13px; flex:0 0 24px;
+  }
+  .q-title .pinyin{ color:var(--accent); font-weight:800; }
+  .audio-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border-radius:50%; border:2px solid var(--accent2);
+    background:#fff7ec; color:#b05a00; font-size:15px; cursor:pointer;
+    flex:0 0 30px; transition:.15s; padding:0;
+  }
+  .audio-btn:hover{ background:var(--accent2); color:#fff; transform:scale(1.08); }
+  .audio-btn:active{ transform:scale(.95); }
+  .circle-options{ display:flex; gap:12px; flex-wrap:wrap; }
+  .circle-btn{
+    padding:10px 20px; border-radius:999px; border:3px solid var(--border);
+    background:#fff; font-size:18px; cursor:pointer; font-weight:700; color:var(--text);
+    transition:.15s;
+  }
+  .circle-btn:hover{ border-color:var(--primary); background:#f1f8f4; }
+  .circle-btn.selected{ border-color:var(--primary); background:#e4f3ea; }
+  .circle-btn.correct{ border-color:var(--ok); background:#d7f5ec; color:#065f46; }
+  .circle-btn.wrong{ border-color:var(--bad); background:#fde2e4; color:#8d0801; }
+  .circle-btn:disabled{ cursor:default; }
+
+  /* 選擇題樣式 */
+  .mc-question{
+    padding:14px; border-radius:14px; background:#fafdfb;
+    border:1px solid var(--border); margin-bottom:14px;
+  }
+  .mc-question .q-title{ font-size:16px; font-weight:700; margin-bottom:10px; display:flex; gap:8px; align-items:flex-start; }
+  .mc-question .q-num{
+    color:#fff; background:var(--primary); border-radius:50%;
+    width:24px;height:24px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:13px; flex:0 0 24px; margin-top:2px;
+  }
+  .q-title .qtext{ white-space:pre-line; }
+  .options{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
+  .opt-btn{
+    padding:10px 14px; border-radius:12px; border:2px solid var(--border);
+    background:#fff; font-size:15px; cursor:pointer; text-align:left;
+    transition:.15s; font-weight:600; color:var(--text);
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .opt-btn:hover{ border-color:var(--primary); background:#f1f8f4; }
+  .opt-btn.selected{ border-color:var(--primary); background:#e4f3ea; }
+  .opt-btn.correct{ border-color:var(--ok); background:#d7f5ec; color:#065f46; }
+  .opt-btn.wrong{ border-color:var(--bad); background:#fde2e4; color:#8d0801; }
+  .opt-btn:disabled{ cursor:default; }
+  .audio-btn-inline{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; border:2px solid var(--accent2);
+    background:#fff7ec; color:#b05a00; font-size:13px; cursor:pointer;
+    flex:0 0 26px; transition:.15s;
+  }
+  .audio-btn-inline:hover{ background:var(--accent2); color:#fff; transform:scale(1.08); }
+
+  /* 填空題樣式 */
+  .fill-question{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:12px 14px; border-radius:12px; background:#fafdfb;
+    border:1px solid var(--border); margin-bottom:12px;
+  }
+  .fill-question .q-text{ font-size:16px; font-weight:600; flex:1 1 auto; }
+  .fill-question input.fill-input{
+    width:80px; text-align:center; font-size:17px; font-weight:800;
+    padding:8px 6px; border-radius:10px; border:2px solid var(--border);
+    color:var(--primary-dark);
+  }
+  .fill-question input.fill-input:focus{ outline:none; border-color:var(--primary); }
+  .fill-question input.fill-input.correct{ border-color:var(--ok); background:#d7f5ec; color:#065f46; }
+  .fill-question input.fill-input.wrong{ border-color:var(--bad); background:#fde2e4; color:#8d0801; }
+  .fb-icon-inline{
+    width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-size:14px; color:#fff; visibility:hidden; flex:0 0 24px;
+  }
+  .fill-question.correct .fb-icon-inline{ visibility:visible; background:var(--ok); }
+  .fill-question.wrong .fb-icon-inline{ visibility:visible; background:var(--bad); }
+  .fill-hint{ width:100%; font-size:12px; color:#8d0801; margin-top:2px; display:none; }
+  .fill-question.wrong .fill-hint{ display:block; }
+
+  /* 配合題樣式 */
+  .bank{
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;
+    padding:14px; background:#f1f8f4; border-radius:12px; border:1px dashed var(--primary);
+  }
+  .bank-item{
+    background:#fff; border:2px solid var(--primary); color:var(--primary-dark);
+    padding:8px 10px 8px 14px; border-radius:10px; font-size:14px; font-weight:600;
+    display:flex; align-items:center; gap:8px;
+  }
+  .match-row{
+    display:flex; align-items:center; gap:12px; padding:10px 12px;
+    border-radius:12px; margin-bottom:10px; background:#fafdfb;
+    border:1px solid var(--border); flex-wrap:wrap;
+  }
+  .match-row .q-text{ flex:1 1 220px; font-size:15px; font-weight:600; }
+  select.match-select{
+    flex:0 0 auto; padding:8px 12px; border-radius:10px; border:2px solid var(--border);
+    font-size:15px; background:#fff; min-width:70px; cursor:pointer;
+  }
+  select.match-select:focus{ outline:none; border-color:var(--primary); }
+  .fb-icon{
+    width:26px; height:26px; flex:0 0 26px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff; visibility:hidden;
+  }
+  .match-row.correct .fb-icon{ visibility:visible; background:var(--ok); }
+  .match-row.wrong .fb-icon{ visibility:visible; background:var(--bad); }
+  .match-row.correct{ border-color:var(--ok); background:#eafaf4; }
+  .match-row.wrong{ border-color:var(--bad); background:#fdecee; }
+
+  .explain{
+    margin-top:8px; font-size:13px; color:var(--muted);
+    background:#fff7e8; border-left:3px solid var(--accent2);
+    padding:6px 10px; border-radius:6px; display:none;
+  }
+  .explain.show{ display:block; }
+
+  .btn-row{ display:flex; justify-content:center; gap:14px; margin:26px 0 10px; flex-wrap:wrap; }
+  .btn{
+    padding:14px 32px; border:none; border-radius:999px; font-size:16px; font-weight:700;
+    cursor:pointer; transition:.2s; box-shadow:0 4px 12px rgba(0,0,0,.12);
+  }
+  .btn-submit{ background:linear-gradient(120deg,var(--primary),var(--primary-dark)); color:#fff; }
+  .btn-submit:hover{ transform:translateY(-2px); box-shadow:0 8px 18px rgba(27,67,50,.3); }
+  .btn-reset{ background:#fff; color:var(--primary-dark); border:2px solid var(--primary); }
+  .btn-reset:hover{ background:#f1f8f4; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+  #result-panel{
+    display:none; text-align:center; background:linear-gradient(135deg,#fff,#f1f8f4);
+    border-radius:20px; padding:28px 20px; margin-top:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.1); border:2px solid var(--primary);
+  }
+  #result-panel.show{ display:block; animation:pop .4s ease; }
+  @keyframes pop{ from{transform:scale(.9);opacity:0;} to{transform:scale(1);opacity:1;} }
+  #result-score{ font-size:52px; font-weight:800; color:var(--primary-dark); margin:6px 0; }
+  #result-score span{ font-size:22px; color:var(--muted); }
+  #result-msg{ font-size:17px; margin-bottom:6px; font-weight:600; }
+  #result-detail{ font-size:14px; color:var(--muted); }
+  .section-score-list{ display:flex; justify-content:center; gap:14px; margin-top:14px; flex-wrap:wrap; }
+  .section-score-list div{
+    background:#fff; border-radius:12px; padding:10px 14px; border:1px solid var(--border); font-size:13px;
+  }
+  .section-score-list b{ display:block; font-size:18px; color:var(--primary-dark); }
+  footer{ text-align:center; font-size:12px; color:var(--muted); margin:20px 0 6px; }
+  @media (max-width:480px){
+    .match-row{ flex-direction:column; align-items:stretch; }
+    select.match-select{ width:100%; }
+    .fb-icon{ align-self:flex-end; margin-top:-30px; }
+  }
+</style>
+</head>
+<body>
+<div id="kuse-main">
+
+  <header class="hero">
+    <h1>📘 真平國中 七年級 台語 第一單元 互動測驗</h1>
+    <p>範圍：第一課、第二課 ｜ 聽講讀寫綜合練習</p>
+    <div class="meta-row">
+      <span class="meta-pill">總分 100 分</span>
+      <span class="meta-pill">圈選題 20 分</span>
+      <span class="meta-pill">選擇題 40 分</span>
+      <span class="meta-pill">寫看覓 25 分</span>
+      <span class="meta-pill">配合題 15 分</span>
+      <span class="meta-pill">自動批改</span>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span>作答進度：<b id="progress-count">0</b> / <b id="progress-total">0</b> 題</span>
+      <span>目前得分：<b id="progress-score">— (交卷後顯示)</b></span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+  </div>
+
+  <!-- 第一部分：圈選題 -->
+  <section class="block">
+    <h2>🔵 一、圈選題<span class="badge-score">每題 4 分，共 20 分</span></h2>
+    <div class="block-sub">把和句子中拼音相對應的漢字圈起來（點選按鈕即為圈選），四選一。可點選🔊按鈕聆聽該語詞正確發音（音檔取自教育部《臺灣台語常用詞辭典》）。</div>
+    <div id="circle-list"></div>
+  </section>
+
+  <!-- 第二部分：選擇題 -->
+  <section class="block">
+    <h2>✅ 二、選擇題<span class="badge-score">每題 5 分，共 40 分</span></h2>
+    <div class="block-sub">每題四選一，請選出上適當的答案。</div>
+    <div id="mc-list"></div>
+  </section>
+
+  <!-- 第三部分：寫看覓 -->
+  <section class="block">
+    <h2>✏️ 三、寫看覓<span class="badge-score">每題 5 分，共 25 分</span></h2>
+    <div class="block-sub">根據華語語詞寫出正確的閩南語漢字（請直接輸入繁體漢字）。</div>
+    <div id="fill-list"></div>
+  </section>
+
+  <!-- 第四部分：配合題 -->
+  <section class="block">
+    <h2>🔗 四、配合題<span class="badge-score">每題 5 分，共 15 分</span></h2>
+    <div class="block-sub">將俗語代號填入相對應的例句中。可點選俗語旁的🔊按鈕聆聽正確發音（音檔取自教育部《臺灣台語常用詞辭典》）。</div>
+    <div class="bank" id="bank-list"></div>
+    <div id="match-list"></div>
+  </section>
+
+  <div class="btn-row">
+    <button class="btn btn-submit" id="btn-submit">📊 交卷並自動批改</button>
+    <button class="btn btn-reset" id="btn-reset">🔄 重新作答</button>
+  </div>
+
+  <div id="result-panel">
+    <div id="result-msg">🎉 測驗完成！</div>
+    <div id="result-score">0<span> / 100 分</span></div>
+    <div id="result-detail">答對 0 / 0 題</div>
+    <div class="section-score-list">
+      <div>圈選題得分<b id="score-circle">0 / 20</b></div>
+      <div>選擇題得分<b id="score-mc">0 / 40</b></div>
+      <div>寫看覓得分<b id="score-fill">0 / 25</b></div>
+      <div>配合題得分<b id="score-match">0 / 15</b></div>
+    </div>
+  </div>
+
+  <footer>真平版台語（閩南語）七年級 第一單元 ｜ 互動測驗由老師提供題目內容製作<br>🔊 發音音檔來源：教育部《臺灣台語常用詞辭典》 sutian.moe.edu.tw</footer>
+</div>
+
+<script type="application/json" id="teaching-design-state">
+{"schema_version":1,"provider":"teacher_supplied","scope":{"school_system":"國中","subject":"台語(閩南語)","textbook":"真平","grade":"七年級","unit":"第一單元"},"confirmed":{"total_score":100,"sections":["圈選題","選擇題","寫看覓","配合題"],"auto_grading":true,"circle_question_options":4,"audio_enabled":true,"audio_source":"教育部《臺灣台語常用詞辭典》sutian.moe.edu.tw"},"teacher_locked":{"content":"老師於對話中提供之完整題目與答案"},"rejected":[]}
+</script>
+
+<script>
+(function(){
+  // ---------- 資料 ----------
+
+  // 一、圈選題
+  var circleItems = [
+    {titleHtml:'1. 阿公的目<span class="pinyin">tsiu</span>定定看袂清楚。', options:["睭","晭","稠","冑"], answer:"睭", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/subak/1/1975.mp3", audioLabel:"目睭 ba̍k-tsiu"},
+    {titleHtml:'2. 阿母𤆬阮去農場<span class="pinyin">bán</span>果子。', options:["腕","挽","慢","輓"], answer:"挽", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/subak/5/5985.mp3", audioLabel:"挽 bán"},
+    {titleHtml:'3. 我無遮𠢕，是你<span class="pinyin">m̄</span>甘嫌啦！', options:["毋","母","無","勿"], answer:"毋", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/subak/0/809.mp3", audioLabel:"毋 m̄"},
+    {titleHtml:'4. 愛好好保護環境，按呢所有的動物才會當繼續生<span class="pinyin">thuànn</span>。', options:["澹","攤","湠","灘"], answer:"湠", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/subak/1/1960.mp3", audioLabel:"湠 thuànn"},
+    {titleHtml:'5. 小妹的個性較<span class="pinyin">pì</span>思。', options:["避","閉","庇","蔽"], answer:"閉", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/subak/8/8045.mp3", audioLabel:"閉思 pì-sù"}
+  ];
+
+  // 二、選擇題
+  var mcItems = [
+    {
+      title:"1. 「天欲暗矣，無較緊咧就會＿＿＿。」空格仔內底囥佗一个上適當？",
+      options:["(A) 滾耍笑","(B) 加食寡","(C) 袂赴市","(D) 袂赴試"],
+      answerIdx:2
+    },
+    {
+      title:"2. 「雖然我真＿＿＿講話，但是做人真實在。」空格仔內底囥佗一个上適當？",
+      options:["(A) 趣味","(B) 閉思","(C) 歹勢","(D) 頇顢"],
+      answerIdx:3
+    },
+    {
+      title:"3. 根據第二課的課文，老師看著學生用火星文寫字有啥物反應？",
+      options:["(A) 真受氣，既然欲寫就愛寫正確的字","(B) 真歡喜，毋過希望學生字愛寫予著","(C) 感覺無適當，毋過煞歹勢共學生講","(D) 要求學生全部重寫，而且罰抄三遍"],
+      answerIdx:1
+    },
+    {
+      title:"4. 有關教育部《臺灣台語常用詞辭典》的查詢方式佗一个是正確的？",
+      options:["(A) 干焦會使拍漢字來查詢","(B) 佇輸入框拍字，揤「搜尋辭典」","(C) 臺羅拼音的聲調干焦會使拍數字","(D) 點「查詞目」會使揣著較濟資料"],
+      answerIdx:1
+    },
+    {
+      title:"5. 根據第一課的課文，為啥物講話有誤會？",
+      options:["(A) 因為有的語詞有無仝意思","(B) 因為少年人講話較無禮貌","(C) 因為有的人佮意用火星文講話","(D) 因為序大無讀冊，所以較袂曉講話"],
+      answerIdx:0
+    },
+    {
+      title:"6. 「明明時間到矣，＿＿無看著人？」格仔內底，添啥物語詞上適合？",
+      options:["(A) 呔會","(B) 啥物","(C) 敢會","(D) 按怎"],
+      answerIdx:0
+    },
+    {
+      title:"7. 「逐擺上數學課的時陣，我敢若＿＿＿。」空格仔內底囥佗一个俗諺上適當？",
+      options:["(A) 鴨仔聽雷","(B) 三講，四毋著","(C) 互相落氣，求進步","(D) 老人毋講古，少年毋捌寶"],
+      optionAudio:[
+        "https://sutian.moe.edu.tw/media/senn/mp3/imtong/39/IR/272041.mp3",
+        "https://sutian.moe.edu.tw/media/senn/mp3/imtong/gt/Tg/269131.mp3",
+        "https://sutian.moe.edu.tw/media/senn/mp3/imtong/1g/JF/269401.mp3",
+        "https://sutian.moe.edu.tw/media/senn/mp3/imtong/Ps/QV/270151.mp3"
+      ],
+      answerIdx:0
+    },
+    {
+      title:"8. 下底佗一个造句無正確？",
+      options:["(A) 小弟對體育課上有「趣味」。","(B) 阿母予人呵咾的時感覺真「歹勢」。","(C) 多謝你送禮物予我，我誠「感心」。","(D) 阿公因為跤咧痛，就用雨傘做「伴手」。"],
+      answerIdx:3
+    }
+  ];
+
+  // 三、寫看覓
+  var fillItems = [
+    {before:"1. 攜帶：（", after:"）物件", answer:"紮"},
+    {before:"2. 下週：（", after:"）禮拜", answer:"後"},
+    {before:"3. 淚腺分泌的透明液體：目（", after:"）", answer:"油"},
+    {before:"4. 向人道歉：會失（", after:"）", answer:"禮"},
+    {before:"5. 反正、無論如何：（", after:"）直", answer:"橫"}
+  ];
+
+  // 四、配合題
+  var matchBank = [
+    {key:"A", label:"(A) 三講，四毋著。", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/gt/Tg/269131.mp3"},
+    {key:"B", label:"(B) 互相落氣，求進步。", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/1g/JF/269401.mp3"},
+    {key:"C", label:"(C) 老人毋講古，少年毋捌寶。", audio:"https://sutian.moe.edu.tw/media/senn/mp3/imtong/Ps/QV/270151.mp3"}
+  ];
+  var matchItems = [
+    {text:"1. 我這篇文章若有無順的所在，你盡量共我講，我嘛會講出你寫了無好的所在，咱兩人＿＿＿。", answer:"B"},
+    {text:"2. 人講＿＿＿，所以我上愛去揣阿公，聽伊講故事，實在足趣味。", answer:"C"},
+    {text:"3. 人若咧冤家，咱毋知頭毋知尾就莫插喙，較袂＿＿＿。", answer:"A"}
+  ];
+
+  var TOTAL_QUESTIONS = circleItems.length + mcItems.length + fillItems.length + matchItems.length;
+  var CIRCLE_TOTAL = 20, MC_TOTAL = 40, FILL_TOTAL = 25, MATCH_TOTAL = 15;
+  var CIRCLE_PER = CIRCLE_TOTAL / circleItems.length;
+  var MC_PER = MC_TOTAL / mcItems.length;
+  var FILL_PER = FILL_TOTAL / fillItems.length;
+  var MATCH_PER = MATCH_TOTAL / matchItems.length;
+
+  var userCircle = new Array(circleItems.length).fill(null);
+  var userMc = new Array(mcItems.length).fill(null);
+  var userFill = new Array(fillItems.length).fill("");
+  var userMatch = new Array(matchItems.length).fill(null);
+  var submitted = false;
+
+  // ---------- 渲染：圈選題 ----------
+  var circleListEl = document.getElementById("circle-list");
+  circleItems.forEach(function(item, idx){
+    var qBlock = document.createElement("div");
+    qBlock.className = "circle-question";
+    qBlock.id = "circle-block-" + idx;
+
+    var titleEl = document.createElement("div");
+    titleEl.className = "q-title";
+    titleEl.innerHTML = item.titleHtml;
+    if (item.audio){
+      var audioBtn = document.createElement("button");
+      audioBtn.type = "button";
+      audioBtn.className = "audio-btn";
+      audioBtn.title = "播放「" + item.audioLabel + "」發音（教育部臺灣台語常用詞辭典）";
+      audioBtn.innerHTML = "🔊";
+      var audioEl = new Audio(item.audio);
+      audioBtn.addEventListener("click", function(aEl){
+        return function(){ aEl.currentTime = 0; aEl.play(); };
+      }(audioEl));
+      titleEl.appendChild(audioBtn);
+    }
+    qBlock.appendChild(titleEl);
+
+    var optsWrap = document.createElement("div");
+    optsWrap.className = "circle-options";
+    item.options.forEach(function(optVal){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "circle-btn";
+      btn.textContent = optVal;
+      btn.addEventListener("click", function(){
+        if (submitted) return;
+        userCircle[idx] = optVal;
+        var siblings = optsWrap.querySelectorAll(".circle-btn");
+        siblings.forEach(function(s){ s.classList.remove("selected"); });
+        btn.classList.add("selected");
+        updateProgress();
+      });
+      optsWrap.appendChild(btn);
+    });
+    qBlock.appendChild(optsWrap);
+    circleListEl.appendChild(qBlock);
+  });
+
+  // ---------- 渲染：選擇題 ----------
+  var mcListEl = document.getElementById("mc-list");
+  mcItems.forEach(function(item, idx){
+    var qBlock = document.createElement("div");
+    qBlock.className = "mc-question";
+    qBlock.id = "mc-block-" + idx;
+
+    var titleEl = document.createElement("div");
+    titleEl.className = "q-title";
+    var num = document.createElement("span");
+    num.className = "q-num";
+    num.textContent = (idx + 1);
+    titleEl.appendChild(num);
+    var titleText = document.createElement("span");
+    titleText.className = "qtext";
+    titleText.textContent = item.title;
+    titleEl.appendChild(titleText);
+    qBlock.appendChild(titleEl);
+
+    var optsWrap = document.createElement("div");
+    optsWrap.className = "options";
+    item.options.forEach(function(optVal, oIdx){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "opt-btn";
+      var optTextSpan = document.createElement("span");
+      optTextSpan.textContent = optVal;
+      btn.appendChild(optTextSpan);
+      if (item.optionAudio && item.optionAudio[oIdx]){
+        var optAudioEl = new Audio(item.optionAudio[oIdx]);
+        var optAudioBtn = document.createElement("span");
+        optAudioBtn.className = "audio-btn audio-btn-inline";
+        optAudioBtn.title = "播放俗諺發音（教育部臺灣台語常用詞辭典）";
+        optAudioBtn.innerHTML = "🔊";
+        optAudioBtn.addEventListener("click", function(aEl){
+          return function(e){ e.stopPropagation(); aEl.currentTime = 0; aEl.play(); };
+        }(optAudioEl));
+        btn.appendChild(optAudioBtn);
+      }
+      btn.addEventListener("click", function(){
+        if (submitted) return;
+        userMc[idx] = oIdx;
+        var siblings = optsWrap.querySelectorAll(".opt-btn");
+        siblings.forEach(function(s){ s.classList.remove("selected"); });
+        btn.classList.add("selected");
+        updateProgress();
+      });
+      optsWrap.appendChild(btn);
+    });
+    qBlock.appendChild(optsWrap);
+    mcListEl.appendChild(qBlock);
+  });
+
+  // ---------- 渲染：寫看覓 ----------
+  var fillListEl = document.getElementById("fill-list");
+  fillItems.forEach(function(item, idx){
+    var row = document.createElement("div");
+    row.className = "fill-question";
+    row.id = "fill-row-" + idx;
+
+    var qText = document.createElement("span");
+    qText.className = "q-text";
+    qText.textContent = item.before;
+    row.appendChild(qText);
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.className = "fill-input";
+    input.id = "fill-input-" + idx;
+    input.maxLength = 4;
+    input.addEventListener("input", function(){
+      userFill[idx] = input.value.trim();
+      updateProgress();
+    });
+    row.appendChild(input);
+
+    var afterText = document.createElement("span");
+    afterText.className = "q-text";
+    afterText.style.flex = "0 0 auto";
+    afterText.textContent = item.after;
+    row.appendChild(afterText);
+
+    var icon = document.createElement("span");
+    icon.className = "fb-icon-inline";
+    icon.id = "fill-icon-" + idx;
+    row.appendChild(icon);
+
+    var hint = document.createElement("div");
+    hint.className = "fill-hint";
+    hint.id = "fill-hint-" + idx;
+    row.appendChild(hint);
+
+    fillListEl.appendChild(row);
+  });
+
+  // ---------- 渲染：配合題 ----------
+  var bankListEl = document.getElementById("bank-list");
+  matchBank.forEach(function(b){
+    var item = document.createElement("div");
+    item.className = "bank-item";
+    var labelSpan = document.createElement("span");
+    labelSpan.textContent = b.label;
+    item.appendChild(labelSpan);
+    if (b.audio){
+      var bankAudioEl = new Audio(b.audio);
+      var bankAudioBtn = document.createElement("button");
+      bankAudioBtn.type = "button";
+      bankAudioBtn.className = "audio-btn audio-btn-inline";
+      bankAudioBtn.title = "播放俗諺發音（教育部臺灣台語常用詞辭典）";
+      bankAudioBtn.innerHTML = "🔊";
+      bankAudioBtn.addEventListener("click", function(aEl){
+        return function(){ aEl.currentTime = 0; aEl.play(); };
+      }(bankAudioEl));
+      item.appendChild(bankAudioBtn);
+    }
+    bankListEl.appendChild(item);
+  });
+
+  var matchListEl = document.getElementById("match-list");
+  matchItems.forEach(function(item, idx){
+    var row = document.createElement("div");
+    row.className = "match-row";
+    row.id = "match-row-" + idx;
+
+    var qText = document.createElement("div");
+    qText.className = "q-text";
+    qText.textContent = item.text;
+
+    var select = document.createElement("select");
+    select.className = "match-select";
+    select.id = "match-select-" + idx;
+    var placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "請選";
+    select.appendChild(placeholder);
+    matchBank.forEach(function(b){
+      var opt = document.createElement("option");
+      opt.value = b.key;
+      opt.textContent = b.key;
+      select.appendChild(opt);
+    });
+    select.addEventListener("change", function(){
+      userMatch[idx] = select.value || null;
+      updateProgress();
+    });
+
+    var icon = document.createElement("div");
+    icon.className = "fb-icon";
+    icon.id = "match-icon-" + idx;
+
+    row.appendChild(qText);
+    row.appendChild(select);
+    row.appendChild(icon);
+    matchListEl.appendChild(row);
+  });
+
+  // ---------- 進度 ----------
+  function updateProgress(){
+    var answered = userCircle.filter(function(a){return a !== null;}).length
+                 + userMc.filter(function(a){return a !== null;}).length
+                 + userFill.filter(function(a){return a !== "";}).length
+                 + userMatch.filter(function(a){return a !== null;}).length;
+    document.getElementById("progress-count").textContent = answered;
+    document.getElementById("progress-total").textContent = TOTAL_QUESTIONS;
+    var pct = (answered / TOTAL_QUESTIONS) * 100;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    if (!submitted){
+      document.getElementById("progress-score").textContent = "— (交卷後顯示)";
+    }
+  }
+  updateProgress();
+
+  // ---------- 交卷批改 ----------
+  document.getElementById("btn-submit").addEventListener("click", function(){
+    var unanswered = userCircle.filter(function(a){return a===null;}).length
+                    + userMc.filter(function(a){return a===null;}).length
+                    + userFill.filter(function(a){return a==="";}).length
+                    + userMatch.filter(function(a){return a===null;}).length;
+    if (unanswered > 0){
+      var proceed = confirm("您還有 " + unanswered + " 題尚未作答，確定要交卷嗎？");
+      if (!proceed) return;
+    }
+
+    submitted = true;
+    var circleScore = 0, mcScore = 0, fillScore = 0, matchScore = 0, correctCount = 0;
+
+    // 圈選題批改
+    circleItems.forEach(function(item, idx){
+      var qBlock = document.getElementById("circle-block-" + idx);
+      var btns = qBlock.querySelectorAll(".circle-btn");
+      var isCorrect = userCircle[idx] === item.answer;
+      btns.forEach(function(btn){
+        btn.disabled = true;
+        if (btn.textContent === item.answer){
+          btn.classList.add("correct");
+        } else if (btn.textContent === userCircle[idx] && !isCorrect){
+          btn.classList.add("wrong");
+        }
+      });
+      if (isCorrect){ circleScore += CIRCLE_PER; correctCount++; }
+    });
+
+    // 選擇題批改
+    mcItems.forEach(function(item, idx){
+      var qBlock = document.getElementById("mc-block-" + idx);
+      var btns = qBlock.querySelectorAll(".opt-btn");
+      var isCorrect = userMc[idx] === item.answerIdx;
+      btns.forEach(function(btn, oIdx){
+        btn.disabled = true;
+        if (oIdx === item.answerIdx){
+          btn.classList.add("correct");
+        } else if (oIdx === userMc[idx] && !isCorrect){
+          btn.classList.add("wrong");
+        }
+      });
+      if (isCorrect){ mcScore += MC_PER; correctCount++; }
+    });
+
+    // 寫看覓批改
+    fillItems.forEach(function(item, idx){
+      var row = document.getElementById("fill-row-" + idx);
+      var input = document.getElementById("fill-input-" + idx);
+      var icon = document.getElementById("fill-icon-" + idx);
+      var hint = document.getElementById("fill-hint-" + idx);
+      input.disabled = true;
+      var isCorrect = userFill[idx] === item.answer;
+      if (isCorrect){
+        row.classList.add("correct");
+        input.classList.add("correct");
+        icon.textContent = "✓";
+        fillScore += FILL_PER;
+        correctCount++;
+      } else {
+        row.classList.add("wrong");
+        input.classList.add("wrong");
+        icon.textContent = "✗";
+        hint.textContent = "正確答案：" + item.answer;
+      }
+    });
+
+    // 配合題批改
+    matchItems.forEach(function(item, idx){
+      var row = document.getElementById("match-row-" + idx);
+      var select = document.getElementById("match-select-" + idx);
+      var icon = document.getElementById("match-icon-" + idx);
+      select.disabled = true;
+      var isCorrect = userMatch[idx] === item.answer;
+      if (isCorrect){
+        row.classList.add("correct");
+        icon.textContent = "✓";
+        matchScore += MATCH_PER;
+        correctCount++;
+      } else {
+        row.classList.add("wrong");
+        icon.textContent = "✗";
+        var hint = document.createElement("div");
+        hint.style.cssText = "width:100%;font-size:12px;color:#8d0801;margin-top:4px;";
+        hint.textContent = "正確答案：" + item.answer;
+        row.appendChild(hint);
+      }
+    });
+
+    var totalScore = Math.round((circleScore + mcScore + fillScore + matchScore) * 10) / 10;
+    circleScore = Math.round(circleScore * 10) / 10;
+    mcScore = Math.round(mcScore * 10) / 10;
+    fillScore = Math.round(fillScore * 10) / 10;
+    matchScore = Math.round(matchScore * 10) / 10;
+
+    document.getElementById("progress-score").textContent = totalScore + " 分";
+
+    var resultPanel = document.getElementById("result-panel");
+    document.getElementById("result-score").innerHTML = totalScore + "<span> / 100 分</span>";
+    document.getElementById("result-detail").textContent = "答對 " + correctCount + " / " + TOTAL_QUESTIONS + " 題";
+    document.getElementById("score-circle").textContent = circleScore + " / " + CIRCLE_TOTAL;
+    document.getElementById("score-mc").textContent = mcScore + " / " + MC_TOTAL;
+    document.getElementById("score-fill").textContent = fillScore + " / " + FILL_TOTAL;
+    document.getElementById("score-match").textContent = matchScore + " / " + MATCH_TOTAL;
+
+    var msg = "🎉 恭喜完成測驗！";
+    if (totalScore >= 90) msg = "🌟 太棒了！台語聽講讀寫都掌握得非常好！";
+    else if (totalScore >= 70) msg = "👍 做得不錯！再複習幾個語詞就更熟練了！";
+    else if (totalScore >= 50) msg = "💪 繼續加油，多聽多唸就會更進步！";
+    else msg = "📘 建議再複習一次課文與語詞，練習會更進步！";
+    document.getElementById("result-msg").textContent = msg;
+
+    resultPanel.classList.add("show");
+    document.getElementById("btn-submit").disabled = true;
+    resultPanel.scrollIntoView({behavior:"smooth", block:"center"});
+  });
+
+  // ---------- 重新作答 ----------
+  document.getElementById("btn-reset").addEventListener("click", function(){
+    if (!confirm("確定要清空所有作答並重新開始嗎？")) return;
+    location.reload();
+  });
+
+})();
+</script>
+</body>
+</html>
